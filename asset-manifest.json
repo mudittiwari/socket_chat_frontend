@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/ayna_frontend/static/css/main.c5d742e4.css",
-    "main.js": "/ayna_frontend/static/js/main.be7ad342.js",
+    "main.js": "/ayna_frontend/static/js/main.2d853d80.js",
     "static/js/787.cda612ba.chunk.js": "/ayna_frontend/static/js/787.cda612ba.chunk.js",
     "index.html": "/ayna_frontend/index.html",
     "main.c5d742e4.css.map": "/ayna_frontend/static/css/main.c5d742e4.css.map",
-    "main.be7ad342.js.map": "/ayna_frontend/static/js/main.be7ad342.js.map",
+    "main.2d853d80.js.map": "/ayna_frontend/static/js/main.2d853d80.js.map",
     "787.cda612ba.chunk.js.map": "/ayna_frontend/static/js/787.cda612ba.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.c5d742e4.css",
-    "static/js/main.be7ad342.js"
+    "static/js/main.2d853d80.js"
   ]
 }
