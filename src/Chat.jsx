@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect,useLayoutEffect ,useState,useRef } from 'react';
 import io from 'socket.io-client';
 import toast, { Toaster } from 'react-hot-toast';
 import axios from 'axios';
@@ -6,7 +6,7 @@ import LoadingBar from './Loadingbar';
 import { useNavigate } from 'react-router-dom';
 import { merge } from './utils/MergeSort';
 import { upload } from './utils/FileUpload';
-import { notifyError } from './utils/Notification';
+import { notifyError, notifySuccess } from './utils/Notification';
 function Chat() {
     const [socket, setSocket] = useState(null);
     const navigate = useNavigate();
@@ -17,6 +17,7 @@ function Chat() {
     const [backgroundImage, setBackgroundImage] = useState('');
     const [suggestedMessages, setSuggestedMessages] = useState([])
     const [showSuggestions, setShowSuggestions] = useState(true);
+    const messagesEndRef = useRef(null);
     const toggleSuggestions = () => {
         setShowSuggestions((prev) => !prev);
     };
@@ -43,8 +44,13 @@ function Chat() {
         let suggestedMessages=response.data.data.attributes.sentences.sentences;
         console.log(socket)
         socket.emit('suggestedMessages', {suggestedMessages})
+        
     }
+    useLayoutEffect(() => {
+        scrollToBottom();
+    }, [sortedMessages]);
     useEffect(() => {
+        
         const jwt = localStorage.getItem('ayna_jwt');
         const user = localStorage.getItem('ayna_user');
         setBackgroundImage(sessionStorage.getItem('backgroundImage'))
@@ -70,6 +76,7 @@ function Chat() {
             sessionStorage.setItem('serverMessages', JSON.stringify(serverMessages));
             const userMessages = JSON.parse(sessionStorage.getItem('userMessages')) || [];
             setSortedMessages(merge(userMessages, serverMessages))
+            scrollToBottom();
         });
         newSocket.on('suggestions_received', (receivedMessages) => {
             console.log(JSON.parse(receivedMessages))
@@ -86,7 +93,12 @@ function Chat() {
             notifyError("Please enter a message");
             return;
         }
-        const currentTime = new Date().toLocaleTimeString();
+        const currentTime = new Date().toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: 'numeric',
+            second: 'numeric',
+            hour12: true,
+        });        
         const newMessage = { username, message, time: currentTime };
         const userMessages = JSON.parse(sessionStorage.getItem('userMessages')) || [];
         const serverMessages = JSON.parse(sessionStorage.getItem('serverMessages')) || [];
@@ -95,6 +107,7 @@ function Chat() {
         socket.emit('message', newMessage);
         setSortedMessages(merge(userMessages, serverMessages))
         setMessage('');
+        scrollToBottom();
     };
 
     const handleLogout = () => {
@@ -109,14 +122,18 @@ function Chat() {
         socket.emit("getsuggestions", { message })
         setShowSuggestions(true)
     };
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
     return (
         <>
             {loading && <LoadingBar />}
             <Toaster />
             <div className="flex justify-center items-center h-screen" style={{ backgroundColor: '#67539f' }}>
-                <div className="bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg rounded-lg p-8 shadow-lg w-3/4 h-3/4">
+            <div className="bg-white bg-opacity-20 backdrop-filter backdrop-blur-lg rounded-lg p-4 sm:p-8 shadow-lg w-11/12 sm:w-3/4 h-3/4">
+
                     <div className="flex flex-col h-full">
-                        <div className="flex justify-between mb-4">
+                        <div className="flex justify-between mb-4 items-center">
                             <h2 className="text-2xl text-white">Chat Room</h2>
                             <div className="text-white flex items-center">Logged in as: {username}</div>
                             <button
@@ -143,6 +160,7 @@ function Chat() {
                                     </div>
                                 </div>
                             ))}
+                             <div ref={messagesEndRef} />
                         </div>
                         <div className="mt-2">
                             {showSuggestions && suggestedMessages.length > 0 && message.trim().length > 0 && (
@@ -192,7 +210,7 @@ function Chat() {
                             </button>
                         </form>
                         <div className="mt-4 flex items-center justify-center">
-                            <label className="block text-white mb-2">Upload Background Image:</label>
+                            <label className="block text-white">Upload Background Image:</label>
                             <div className="flex items-center mx-2">
                                 <input
                                     type="file"
