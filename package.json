@@ -1,5 +1,6 @@
 {
   "name": "frontend",
+  "homepage": "http://mudittiwari.github.io/ayna_frontend"
   "version": "0.1.0",
   "private": true,
   "dependencies": {
